@@ -1,9 +1,17 @@
 const Product = require('../models/Product');
-const mongoose=require('mongoose');
+const mongoose = require('mongoose');
+
+// Get all products
 exports.getAllProducts = async (req, res) => {
-  const products = await Product.find();
-  res.json(products);
+  try {
+    const products = await Product.find();
+    res.json(products);
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching products', error: err.message });
+  }
 };
+
+// Get product statistics
 exports.getProductStats = async (req, res) => {
   try {
     const total = await Product.countDocuments();
@@ -14,24 +22,30 @@ exports.getProductStats = async (req, res) => {
     res.status(500).json({ message: 'Error fetching stats', error: err.message });
   }
 };
+
+// Create a new product
 exports.createProduct = async (req, res) => {
-  const { name, description, price, stock, category } = req.body;
-  const image = req.file ? req.file.filename : null;
+  try {
+    const { name, description, price, stock, category } = req.body;
+    const image = req.file ? `uploads/${req.file.filename}` : null;
 
-  const product = new Product({
-    name,
-    description,
-    price,
-    stock,
-    category,
-    image,
-  });
+    const product = new Product({
+      name,
+      description,
+      price,
+      stock,
+      category,
+      image,
+    });
 
-  await product.save();
-  res.status(201).json(product);
+    await product.save();
+    res.status(201).json(product);
+  } catch (err) {
+    res.status(500).json({ message: 'Error creating product', error: err.message });
+  }
 };
 
-
+// Update an existing product
 exports.updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
@@ -44,7 +58,7 @@ exports.updateProduct = async (req, res) => {
     const updateData = { name, description, price, stock, category };
 
     if (req.file) {
-      updateData.image = req.file.filename;
+      updateData.image = `uploads/${req.file.filename}`;
     }
 
     const product = await Product.findByIdAndUpdate(productId, updateData, { new: true });
@@ -59,7 +73,15 @@ exports.updateProduct = async (req, res) => {
   }
 };
 
+// Delete a product
 exports.deleteProduct = async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
-  res.json({ message: 'Deleted' });
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ message: 'Product not found' });
+    }
+    res.json({ message: 'Product deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting product', error: err.message });
+  }
 };
