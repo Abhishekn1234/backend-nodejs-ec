@@ -7,14 +7,16 @@ const orderRoutes = require('./routes/Orders');
 const cors=require('cors');
 dotenv.config();
 connectDB();
+const path = require('path');
 
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'http://localhost:3000', // Allow only your frontend
+  origin: 'http://localhost:3000',
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true 
 }));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.get('/', (req, res) => {
   res.send('Hello from Render!');
 });
