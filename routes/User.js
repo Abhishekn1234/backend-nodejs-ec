@@ -19,23 +19,34 @@ const generateToken = (user) => {
 
 
 router.post('/register', async (req, res) => {
-  const { name, mobile, password } = req.body;
+  try {
+    const { name, mobile, password } = req.body;
 
-  const existingUser = await User.findOne({ mobile });
-  if (existingUser) return res.status(400).json({ message: 'User already exists' });
+    // Basic input validation
+    if (!name || !mobile || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
-  
-  const isAdmin = name.toLowerCase().startsWith('admin');
+    const existingUser = await User.findOne({ mobile });
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
 
-  const newUser = await User.create({ name, mobile, password, isAdmin });
+    const isAdmin = name.toLowerCase().startsWith('admin');
 
-  res.status(201).json({
-    _id: newUser._id,
-    name: newUser.name,
-    mobile: newUser.mobile,
-    isAdmin: newUser.isAdmin,
-    token: generateToken(newUser),
-  });
+    const newUser = await User.create({ name, mobile, password, isAdmin });
+
+    res.status(201).json({
+      _id: newUser._id,
+      name: newUser.name,
+      mobile: newUser.mobile,
+      isAdmin: newUser.isAdmin,
+      token: generateToken(newUser),
+    });
+  } catch (error) {
+    console.error('Registration Error:', error.message);
+    res.status(500).json({ message: 'Server Error' });
+  }
 });
 
 
