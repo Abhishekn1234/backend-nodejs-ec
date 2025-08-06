@@ -4,7 +4,16 @@ exports.getAllProducts = async (req, res) => {
   const products = await Product.find();
   res.json(products);
 };
+exports.getProductStats = async (req, res) => {
+  try {
+    const total = await Product.countDocuments();
+    const lowStock = await Product.countDocuments({ stock: { $lte: 10 } });
 
+    res.json({ total, lowStock });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching stats', error: err.message });
+  }
+};
 exports.createProduct = async (req, res) => {
   const { name, description, price, stock, category } = req.body;
   const image = req.file ? req.file.filename : null;
