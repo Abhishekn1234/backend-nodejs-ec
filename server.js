@@ -7,12 +7,13 @@ const orderRoutes = require('./routes/Orders');
 const cors=require('cors');
 dotenv.config();
 connectDB();
-app.get('/', (req, res) => {
-  res.send('Hello from Render!');
-});
+
 const app = express();
 app.use(express.json());
 app.use(cors());
+app.get('/', (req, res) => {
+  res.send('Hello from Render!');
+});
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
